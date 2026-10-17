@@ -1,0 +1,13 @@
+<!--<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">-->
+<!--<suite name="Selenium labs">-->
+<!--    <test name="All labs">-->
+<!--        <classes>-->
+<!--            <class name="tests.EmployeesTest"/>-->
+<!--            <class name="tests.SingleSelectTest"/>-->
+<!--            <class name="tests.MultiSelectTest"/>-->
+<!--            <class name="tests.VisibilityTest"/>-->
+<!--            <class name="tests.FluentWaitTest"/>-->
+<!--            <class name="tests.GesturesTest"/>-->
+<!--        </classes>-->
+<!--    </test>-->
+<!--</suite>-->

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Selenium Practice Site</title>
+<style>
+  :root{--ink:#1C1830;--ink2:#4A4560;--paper:#F6F5F9;--panel:#fff;--line:#DCD8E6;--purple:#6A3FB5;--deep:#4B2689;--soft:#EFE9F9;--ok:#1F7A55;--oksoft:#E3F3EC;--warn:#9A5A07}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 "IBM Plex Sans",system-ui,sans-serif}
+  header{background:var(--deep);color:#fff;padding:14px 24px}
+  header h1{margin:0;font-size:20px}
+  header p{margin:2px 0 0;color:#d9ccf3;font-size:14px}
+  main{max-width:860px;margin:24px auto;padding:0 16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin-bottom:16px}
+  h2{margin:0 0 4px;font-size:20px;color:var(--deep)}
+  h3{margin:18px 0 6px;font-size:16px}
+  p.hint{margin:0 0 12px;color:var(--ink2);font-size:14px}
+  button,select,input[type=text],input[type=password]{font:inherit;padding:6px 12px;border:1px solid var(--line);border-radius:6px;background:#fff}
+  button{background:var(--purple);color:#fff;border-color:var(--purple);cursor:pointer}
+  button:disabled{background:#b9aed3;border-color:#b9aed3;cursor:not-allowed}
+  button.alt{background:#fff;color:var(--deep)}
+  table{border-collapse:collapse;width:100%}
+  th,td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:left}
+  th{background:var(--soft);color:var(--deep);font-size:14px}
+  .out{margin-top:10px;padding:8px 12px;background:var(--oksoft);color:var(--ok);border-radius:6px;font-family:"JetBrains Mono",monospace;font-size:14px;min-height:20px}
+  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+  .box{border:1px dashed var(--purple);border-radius:8px;padding:30px;text-align:center;background:var(--soft);user-select:none}
+  .menu{position:fixed;background:#fff;border:1px solid var(--line);border-radius:6px;box-shadow:0 4px 14px rgba(0,0,0,.15);min-width:130px}
+  .menu a{display:block;padding:8px 14px;color:var(--ink);text-decoration:none}
+  .menu a:hover{background:var(--soft)}
+  ul.sel{list-style:none;padding:0;margin:0;border:1px solid var(--line);border-radius:6px;width:260px}
+  ul.sel li{padding:8px 12px;border-bottom:1px solid var(--line);cursor:pointer;user-select:none}
+  ul.sel li:last-child{border-bottom:0}
+  ul.sel li.selected{background:var(--purple);color:#fff}
+  .bar{width:100%;height:14px;background:var(--soft);border-radius:7px;overflow:hidden}
+  .bar>div{height:100%;width:0;background:var(--purple)}
+  .banner{padding:12px;background:#FBF0DF;color:var(--warn);border-radius:6px;margin-top:10px}
+  a.lab{display:block;padding:10px 0;color:var(--deep)}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header><h1>Selenium Practice Site</h1><p id="crumb">Practice pages for the Selenium labs</p></header>
+<main id="app"></main>
+
+<!-- ============ TEMPLATES ============ -->
+
+<template id="tpl-home">
+  <div class="card">
+    <h2>Pick a lab</h2>
+    <p class="hint">Your tests open these pages with <code>?lab=name</code>.</p>
+    <a class="lab" href="?lab=employees">1. Dynamic locators: employees table (?lab=employees)</a>
+    <a class="lab" href="?lab=single">2. Single-select dropdown (?lab=single)</a>
+    <a class="lab" href="?lab=multi">3. Multi-select dropdown (?lab=multi)</a>
+    <a class="lab" href="?lab=visibility">4. isDisplayed() and visibility (?lab=visibility)</a>
+    <a class="lab" href="?lab=fluent">5. FluentWait and custom conditions (?lab=fluent)</a>
+    <a class="lab" href="?lab=gestures">6. Context click and gestures (?lab=gestures)</a>
+  </div>
+</template>
+
+<template id="tpl-employees">
+  <div class="card">
+    <h2>Employees</h2>
+    <p class="hint">Select employees with the checkboxes. Every row has the same buttons, so you must find them by the employee name.</p>
+    <table id="employeeTable">
+      <thead><tr><th></th><th>Name</th><th>Department</th><th>Role</th><th>Status</th><th>Action</th></tr></thead>
+      <tbody>
+        <tr><td><input type="checkbox"></td><td>Sara Ahmed</td><td>QA</td><td>Tester</td><td>Active</td><td><button class="alt">Edit</button></td></tr>
+        <tr><td><input type="checkbox"></td><td>Omar Khaled</td><td>Development</td><td>Developer</td><td>Active</td><td><button class="alt">Edit</button></td></tr>
+        <tr><td><input type="checkbox"></td><td>Laila Hassan</td><td>HR</td><td>Recruiter</td><td>Inactive</td><td><button class="alt">Edit</button></td></tr>
+        <tr><td><input type="checkbox"></td><td>Youssef Ali</td><td>QA</td><td>Test Lead</td><td>Active</td><td><button class="alt">Edit</button></td></tr>
+        <tr><td><input type="checkbox"></td><td>Nour Mostafa</td><td>Development</td><td>Developer</td><td>Inactive</td><td><button class="alt">Edit</button></td></tr>
+        <tr><td><input type="checkbox"></td><td>Hana Samir</td><td>Design</td><td>Designer</td><td>Active</td><td><button class="alt">Edit</button></td></tr>
+      </tbody>
+    </table>
+    <div class="out" id="selectedCount">Selected: 0</div>
+    <div class="out" id="editMessage">Nothing is being edited</div>
+  </div>
+</template>
+
+<template id="tpl-single">
+  <div class="card">
+    <h2>Single-select dropdown</h2>
+    <p class="hint">Choose one country. Only one option can be selected at a time.</p>
+    <div class="row">
+      <label for="country">Country</label>
+      <select id="country">
+        <option value="">-- Select a country --</option>
+        <option value="eg">Egypt</option>
+        <option value="de">Germany</option>
+        <option value="jp">Japan</option>
+        <option value="ca">Canada</option>
+        <option value="xx" disabled>Atlantis (not available)</option>
+      </select>
+    </div>
+    <div class="out" id="countryResult">You selected: nothing</div>
+  </div>
+</template>
+
+<template id="tpl-multi">
+  <div class="card">
+    <h2>Multi-select dropdown</h2>
+    <p class="hint">Choose your skills. Hold Ctrl to pick more than one.</p>
+    <div class="row">
+      <label for="skills">Skills</label>
+      <select id="skills" multiple size="5">
+        <option value="java">Java</option>
+        <option value="selenium">Selenium</option>
+        <option value="testng">TestNG</option>
+        <option value="maven">Maven</option>
+        <option value="appium">Appium</option>
+      </select>
+    </div>
+    <div class="row"><button id="showSkills">Show my skills</button></div>
+    <div class="out" id="skillsResult">Skills: none</div>
+  </div>
+</template>
+
+<template id="tpl-visibility">
+  <div class="card">
+    <h2>Visible or not?</h2>
+    <p class="hint">Some elements are in the page but hidden. Some are not in the page yet.</p>
+
+    <h3>1. A message you can show and hide</h3>
+    <div class="row"><button id="toggleMessage">Show / hide message</button></div>
+    <div id="message" class="out" style="display:none">Hello! I am a visible message.</div>
+
+    <h3>2. A field that is always hidden</h3>
+    <input type="text" id="secretField" value="secret" style="display:none">
+    <p class="hint">There is an input here in the HTML, but you cannot see it.</p>
+
+    <h3>3. A banner that is added to the page later</h3>
+    <div class="row"><button id="loadBanner">Load banner</button><button id="removeBanner" class="alt">Remove banner</button></div>
+    <div id="bannerHolder"></div>
+  </div>
+</template>
+
+<template id="tpl-fluent">
+  <div class="card">
+    <h2>Things that take time</h2>
+    <p class="hint">Each block starts a slow action. Your test has to wait the right way.</p>
+
+    <h3>1. Download progress (takes about 4 seconds)</h3>
+    <div class="row"><button id="startDownload">Start download</button></div>
+    <div class="bar"><div id="barFill"></div></div>
+    <div class="out" id="progressText">Progress: not started</div>
+
+    <h3>2. A message that appears after 3 seconds</h3>
+    <div class="row"><button id="showLater">Show message later</button></div>
+    <div id="laterHolder"></div>
+
+    <h3>3. A counter that goes up every second (up to 5)</h3>
+    <div class="row"><button id="startCounter">Start counter</button></div>
+    <div class="out" id="counter">0</div>
+
+    <h3>4. A button that is disabled for 3 seconds</h3>
+    <div class="row"><button id="enableLate">Prepare button</button><button id="lateButton" disabled>Submit</button></div>
+    <div class="out" id="lateResult">Not submitted</div>
+
+    <h3>5. An element that never appears</h3>
+    <div class="row"><button id="neverButton">Load something</button></div>
+    <div id="neverHolder"></div>
+  </div>
+</template>
+
+<template id="tpl-gestures">
+  <div class="card">
+    <h2>1. Right-click menu</h2>
+    <div class="box" id="contextArea">Right-click anywhere in this area</div>
+    <div class="out" id="contextResult">No action yet</div>
+  </div>
+  <div class="card">
+    <h2>2. Two buttons and the time between clicks</h2>
+    <div class="row"><button id="button1">Button 1</button><button id="button2">Button 2</button></div>
+    <div class="out" id="clickLog">No clicks yet</div>
+    <div class="out" id="gap">Gap: not measured</div>
+  </div>
+  <div class="card">
+    <h2>3. Pick several items</h2>
+    <p class="hint">A normal click selects one item. Hold Ctrl and click to select more.</p>
+    <ul class="sel" id="itemList">
+      <li id="item1">Item 1</li><li id="item2">Item 2</li><li id="item3">Item 3</li><li id="item4">Item 4</li><li id="item5">Item 5</li>
+    </ul>
+    <div class="out" id="selectedItems">Selected: none</div>
+  </div>
+  <div class="card">
+    <h2>4. Keyboard-only login form</h2>
+    <p class="hint">Type a name, press Tab, type a password, press Enter.</p>
+    <form id="loginForm" autocomplete="off">
+      <div class="row"><label for="username" style="width:90px">Username</label><input type="text" id="username"></div>
+      <div class="row"><label for="password" style="width:90px">Password</label><input type="password" id="password"></div>
+    </form>
+    <div class="out" id="loginResult">Not logged in</div>
+  </div>
+</template>
+
+<script>
+(function () {
+  var params = new URLSearchParams(location.search);
+  var lab = params.get('lab') || location.hash.replace('#', '') || 'home';
+  var app = document.getElementById('app');
+  var tpl = document.getElementById('tpl-' + lab) || document.getElementById('tpl-home');
+  if (!document.getElementById('tpl-' + lab)) lab = 'home';
+  app.appendChild(tpl.content.cloneNode(true));
+  document.getElementById('crumb').textContent = lab === 'home' ? 'Practice pages for the Selenium labs' : 'Lab: ' + lab + '  (back to the list: ?lab=home)';
+  function $(id) { return document.getElementById(id); }
+
+  var labs = {};
+
+  labs.employees = function () {
+    var boxes = document.querySelectorAll('#employeeTable tbody input[type=checkbox]');
+    function update() {
+      var names = [];
+      boxes.forEach(function (b) { if (b.checked) names.push(b.closest('tr').children[1].textContent); });
+      $('selectedCount').textContent = 'Selected: ' + names.length;
+    }
+    boxes.forEach(function (b) { b.addEventListener('change', update); });
+    document.querySelectorAll('#employeeTable button').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        $('editMessage').textContent = 'Editing: ' + btn.closest('tr').children[1].textContent;
+      });
+    });
+  };
+
+  labs.single = function () {
+    $('country').addEventListener('change', function () {
+      var s = this.options[this.selectedIndex];
+      $('countryResult').textContent = 'You selected: ' + (this.value === '' ? 'nothing' : s.text);
+    });
+  };
+
+  labs.multi = function () {
+    $('showSkills').addEventListener('click', function () {
+      var chosen = Array.prototype.filter.call($('skills').options, function (o) { return o.selected; })
+                       .map(function (o) { return o.text; });
+      $('skillsResult').textContent = 'Skills: ' + (chosen.length ? chosen.join(', ') : 'none');
+    });
+  };
+
+  labs.visibility = function () {
+    $('toggleMessage').addEventListener('click', function () {
+      var m = $('message');
+      m.style.display = m.style.display === 'none' ? 'block' : 'none';
+    });
+    $('loadBanner').addEventListener('click', function () {
+      if ($('promoBanner')) return;
+      setTimeout(function () {
+        var d = document.createElement('div');
+        d.id = 'promoBanner'; d.className = 'banner'; d.textContent = 'Special offer: 20% off today!';
+        $('bannerHolder').appendChild(d);
+      }, 1500);
+    });
+    $('removeBanner').addEventListener('click', function () {
+      var b = $('promoBanner'); if (b) b.remove();
+    });
+  };
+
+  labs.fluent = function () {
+    $('startDownload').addEventListener('click', function () {
+      var p = 0; $('progressText').textContent = 'Progress: 0%';
+      var t = setInterval(function () {
+        p += 10; $('progressText').textContent = 'Progress: ' + p + '%'; $('barFill').style.width = p + '%';
+        if (p >= 100) clearInterval(t);
+      }, 400);
+    });
+    $('showLater').addEventListener('click', function () {
+      setTimeout(function () {
+        var d = document.createElement('div');
+        d.id = 'laterMessage'; d.className = 'banner'; d.textContent = 'I am here at last!';
+        $('laterHolder').appendChild(d);
+      }, 3000);
+    });
+    $('startCounter').addEventListener('click', function () {
+      var n = 0; $('counter').textContent = '0';
+      var t = setInterval(function () { n++; $('counter').textContent = String(n); if (n >= 5) clearInterval(t); }, 1000);
+    });
+    $('enableLate').addEventListener('click', function () {
+      setTimeout(function () { $('lateButton').disabled = false; }, 3000);
+    });
+    $('lateButton').addEventListener('click', function () { $('lateResult').textContent = 'Submitted!'; });
+    $('neverButton').addEventListener('click', function () {
+      setTimeout(function () {
+        var d = document.createElement('div');
+        d.id = 'neverAppears'; d.textContent = 'You will not see me';
+        d.style.display = 'none'; $('neverHolder').appendChild(d);
+      }, 500);
+    });
+  };
+
+  labs.gestures = function () {
+    // 1. context menu
+    var menu = null;
+    function closeMenu() { if (menu) { menu.remove(); menu = null; } }
+    $('contextArea').addEventListener('contextmenu', function (e) {
+      e.preventDefault(); closeMenu();
+      var x = e.clientX, y = e.clientY;
+      setTimeout(function () {
+        menu = document.createElement('div'); menu.className = 'menu'; menu.id = 'contextMenu';
+        menu.style.left = x + 'px'; menu.style.top = y + 'px';
+        ['Copy', 'Paste', 'Delete'].forEach(function (name) {
+          var a = document.createElement('a'); a.href = '#'; a.textContent = name;
+          a.addEventListener('click', function (ev) {
+            ev.preventDefault(); $('contextResult').textContent = 'Action: ' + name; closeMenu();
+          });
+          menu.appendChild(a);
+        });
+        document.body.appendChild(menu);
+      }, 300);
+    });
+    document.addEventListener('click', function (e) { if (menu && !menu.contains(e.target)) closeMenu(); });
+
+    // 2. two buttons and the gap
+    var t1 = null;
+    $('button1').addEventListener('click', function () {
+      t1 = Date.now(); $('clickLog').textContent = 'Button 1 clicked'; $('gap').textContent = 'Gap: waiting for button 2';
+    });
+    $('button2').addEventListener('click', function () {
+      if (t1 === null) { $('clickLog').textContent = 'Click button 1 first'; return; }
+      var gap = Date.now() - t1;
+      $('clickLog').textContent = 'Button 1 then Button 2 clicked';
+      $('gap').textContent = 'Gap: ' + gap + ' ms';
+    });
+
+    // 3. ctrl multi-select
+    var items = document.querySelectorAll('#itemList li');
+    function showItems() {
+      var names = [];
+      items.forEach(function (li) { if (li.classList.contains('selected')) names.push(li.textContent); });
+      $('selectedItems').textContent = 'Selected: ' + (names.length ? names.join(', ') : 'none');
+    }
+    items.forEach(function (li) {
+      li.addEventListener('click', function (e) {
+        if (e.ctrlKey || e.metaKey) { li.classList.toggle('selected'); }
+        else { items.forEach(function (x) { x.classList.remove('selected'); }); li.classList.add('selected'); }
+        showItems();
+      });
+    });
+
+    // 4. keyboard login
+    function tryLogin() {
+      var u = $('username').value, p = $('password').value;
+      $('loginResult').textContent = (u && p) ? 'Logged in as ' + u : 'Please fill both fields';
+    }
+    $('loginForm').addEventListener('submit', function (e) { e.preventDefault(); });
+    ['username', 'password'].forEach(function (id) {
+      $(id).addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); tryLogin(); } });
+    });
+  };
+
+  if (labs[lab]) labs[lab]();
+})();
+</script>
+</body>
+</html>
