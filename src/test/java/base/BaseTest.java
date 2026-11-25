@@ -1,7 +1,6 @@
 package base;
 
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
@@ -12,17 +11,19 @@ public class BaseTest {
 
     protected WebDriver driver;
 
+    // The browser now comes from DriverManager, which keeps one WebDriver per thread
+    // (ThreadLocal<WebDriver>) so tests can run in parallel. Browser / headless are read
+    // from config.properties.
     @BeforeMethod
     public void startBrowser() {
-        driver = new ChromeDriver();
-        driver.manage().window().maximize();
+        DriverManager.initDriver();
+        driver = DriverManager.getDriver();
     }
 
     @AfterMethod(alwaysRun = true)
     public void stopBrowser() {
-        if (driver != null) {
-            driver.quit();
-        }
+        DriverManager.quitDriver();
+        driver = null;
     }
 
     // Opens one lab of the practice site, for example openLab("employees")

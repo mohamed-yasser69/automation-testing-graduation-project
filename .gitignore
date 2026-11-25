@@ -36,3 +36,7 @@ build/
 
 ### Mac OS ###
 .DS_Store
+### Test output ###
+logs/
+allure-results/
+# allure-report/ is intentionally NOT ignored (the assignment requires committing it)

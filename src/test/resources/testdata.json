@@ -1,0 +1,30 @@
+{
+  "validUser": [
+    { "username": "Admin", "password": "admin123" }
+  ],
+  "invalidLogins": [
+    { "username": "wrongUser", "password": "wrongPass", "expectedError": "Invalid credentials" },
+    { "username": "Admin",     "password": "badPassword1", "expectedError": "Invalid credentials" },
+    { "username": "NoSuchUser", "password": "admin123", "expectedError": "Invalid credentials" }
+  ],
+  "existingEmployees": [
+    { "name": "Peter" }
+  ],
+  "nonExistingEmployees": [
+    { "name": "Zzxqwvu Nonexistent" }
+  ],
+  "newEmployees": [
+    { "firstName": "Graduation", "lastName": "Tester" }
+  ],
+  "sidebarMenus": [
+    { "name": "Admin" },
+    { "name": "PIM" },
+    { "name": "Leave" },
+    { "name": "Time" },
+    { "name": "Recruitment" },
+    { "name": "My Info" },
+    { "name": "Performance" },
+    { "name": "Dashboard" },
+    { "name": "Directory" }
+  ]
+}
